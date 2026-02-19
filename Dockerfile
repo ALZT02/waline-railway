@@ -1,21 +1,15 @@
-# https://github.com/nodejs/LTS
-FROM node:lts AS build
-WORKDIR /app
-ENV NODE_ENV production
-COPY package.json /app/package.json
-RUN set -eux; \
-	npm install --production
+FROM node:18-alpine
 
-FROM node:lts-alpine
 WORKDIR /app
-ENV TZ Asia/Shanghai
-ENV NODE_ENV production
-RUN set -eux; \
-	apk add --no-cache bash; \
-	apk add --no-cache --virtual .build-deps alpine-conf; \
-	setup-timezone -z ${TZ}; \
-	apk del --no-network .build-deps
-COPY --from=build /app .
-COPY index.js /app/index.js
-EXPOSE 3000
-CMD ["node", "index.js"]
+
+# 安装 Waline
+RUN npm install @waline/vercel -g
+
+# 设置环境变量
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=8360
+
+EXPOSE 8360
+
+CMD ["waline"]
